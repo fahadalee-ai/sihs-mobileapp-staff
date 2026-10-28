@@ -18,7 +18,7 @@ function OrganizationAccess() {
 
   return (
     <div>
-      <ScreenHeader title="Organization access" backTo="/profile" />
+      <ScreenHeader title="Request organization access" backTo="/profile" />
       <form
         className="px-4 pb-8"
         onSubmit={(e) => {

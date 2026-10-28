@@ -24,7 +24,7 @@ export const PRICING_APPOINTMENT =
   "All pricing confirmed prior to deposit. Deposit required before scheduling or dispatch.";
 
 export const DEPOSIT_EARNED =
-  "Deposit earned upon dispatch (non-refundable to the extent permitted by law).";
+  "Deposit becomes earned after dispatch to the extent permitted by law.";
 
 export const REFUND_LINE =
   "Refund eligibility is determined by SIH&S in accordance with the Full Terms & Agreement.";

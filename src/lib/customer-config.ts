@@ -9,7 +9,7 @@ export const CUSTOMER_CONFIG = {
     completed: "Completed",
     postponed: "Postponed",
     canceled: "Cancelled",
-    updated: "Updated",
+    updated: "Updated (postponed or reassigned)",
     followUp: "Follow-up in progress",
     paused: "Work paused",
     resumed: "Work resumed",
@@ -27,7 +27,7 @@ export const CUSTOMER_CONFIG = {
     "You can cancel a request before SIH&S accepts it. Refund eligibility is still determined under the Full Terms & Agreement.",
   propertyChangeMessage: "Change requests are sent to SIH&S for review. Approved property records are not overwritten here.",
   towingAuthMessage:
-    "Private-property towing needs verified authorization. This request is marked Authorization pending verification and is not an approved tow.",
+    "A general service request is not sufficient for private-property towing. SIH&S must verify authorization before any vehicle removal.",
   documentCategories: ["Approved reports", "Job packets", "Receipts"] as const,
 } as const;
 
@@ -41,7 +41,7 @@ export const REQUEST_STATUS_LABELS = {
   scheduled: "Scheduled",
   assigned: "Assigned",
   "in-progress": "In progress",
-  updated: "Updated",
+  updated: "Updated (postponed or reassigned)",
   completed: "Completed",
   canceled: "Canceled",
   "cancellation-requested": "Cancellation requested—pending SIH&S confirmation.",

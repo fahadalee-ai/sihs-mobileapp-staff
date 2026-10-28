@@ -13,6 +13,7 @@ import { useEffect, useLayoutEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { StaffProvider } from "../lib/staff-store";
 import { AppProvider } from "../lib/store";
 import { AppShell } from "../components/AppShell";
 import { asset } from "../lib/utils";
@@ -136,10 +137,12 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <AppProvider>
-        <AppShell>
-          {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-          <Outlet />
-        </AppShell>
+        <StaffProvider>
+          <AppShell>
+            {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+            <Outlet />
+          </AppShell>
+        </StaffProvider>
       </AppProvider>
     </QueryClientProvider>
   );

@@ -1,10 +1,11 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
+import { Art } from "@/components/Art";
 import { CallHook, ScreenHeader } from "@/components/Chrome";
 import { Button } from "@/components/kit";
 import { RESTRICTED_MEDIA_SLUGS, customerStatusLabel } from "@/lib/customer-config";
 import { DEPOSIT_EARNED, REFUND_LINE } from "@/lib/content";
-import { useApp, type Booking } from "@/lib/store";
+import { useApp } from "@/lib/store";
 import towingPhoto from "@/img/photo-towing.jpg";
 import lockoutPhoto from "@/img/photo-lockout.jpg";
 import jumpPhoto from "@/img/photo-jump.jpg";
@@ -34,50 +35,41 @@ function formatStamp(iso?: string) {
   };
 }
 
-function staffNotes(booking: Booking) {
-  if (booking.staffNotes?.length) return booking.staffNotes;
-  const at = booking.statusHistory?.[0]?.at ?? "";
-  const notes = [
-    {
-      at,
-      author: "SIH&S",
-      body: `${booking.serviceTitle} is on file. A preferred time is not a confirmed appointment, and this note does not dispatch a crew.`,
-    },
-  ];
-  if (booking.scope) notes.push({ at, author: "SIH&S", body: booking.scope });
-  if (booking.authorizationPending) {
-    notes.push({
-      at,
-      author: "SIH&S",
-      body: "Private-property towing authorization is pending verification. The vehicle has not been approved for removal.",
-    });
+const TIMELINE = ["Received", "Reviewed", "Confirmed", "Scheduled", "Assigned", "In progress", "Completed"] as const;
+
+function canonStep(label: string) {
+  const value = label.toLowerCase();
+  if (value.includes("completed")) return "Completed";
+  if (value.includes("progress")) return "In progress";
+  if (value.includes("assigned")) return "Assigned";
+  if (value.includes("scheduled")) return "Scheduled";
+  if (value.includes("confirmed") || value.includes("deposit")) return "Confirmed";
+  if (value.includes("reviewed")) return "Reviewed";
+  if (value.includes("received")) return "Received";
+  return null;
+}
+
+function visibleSteps(history: { at: string; label: string }[]) {
+  const found = new Map<string, string>();
+  for (const event of history) {
+    const step = canonStep(event.label);
+    if (step && !found.has(step)) found.set(step, event.at);
   }
-  for (const event of booking.statusHistory ?? []) {
-    if (event.source === "sihs") notes.push({ at: event.at, author: "SIH&S", body: event.label });
-  }
-  if (booking.status === "completed") {
-    notes.push(
-      { at, author: "SIH&S crew", body: "Before photos were taken at the service location before work started." },
-      { at, author: "SIH&S crew", body: "Work is complete. After photos were added. The original request is still on this record." },
-    );
-  }
-  if (booking.status === "canceled") {
-    notes.push({
-      at: booking.statusHistory?.at(-1)?.at ?? at,
-      author: "SIH&S",
-      body: `Canceled. Reason: ${booking.cancelReason || "Not recorded"}. Before and after photos were not taken.`,
-    });
-  }
-  return notes;
+  return TIMELINE.filter((step) => found.has(step)).map((label) => ({ label, at: found.get(label) ?? "" }));
 }
 
 function RequestDetail() {
   const { id } = Route.useParams();
-  const { bookings, cancelBooking, recordDeposit, acceptDelivery, reportDeliveryIssue, acknowledgeShared } = useApp();
+  const { bookings, cancelBooking, recordDeposit, acceptDelivery, reportDeliveryIssue, acknowledgeShared, addInformation, requestFollowUp, retrySync } = useApp();
   const navigate = useNavigate();
   const booking = bookings.find((item) => item.id === id);
   const [cancelOpen, setCancelOpen] = useState(false);
   const [issue, setIssue] = useState("");
+  const [info, setInfo] = useState("");
+  const [infoOpen, setInfoOpen] = useState(false);
+  const [payOpen, setPayOpen] = useState<"deposit" | "balance" | null>(null);
+  const [payFailed, setPayFailed] = useState(false);
+  const [followUpId, setFollowUpId] = useState("");
 
   if (!booking) {
     return (
@@ -113,7 +105,6 @@ function RequestDetail() {
   const history = booking.statusHistory?.length
     ? booking.statusHistory
     : [{ at: "", label, source: "customer" as const }];
-  const notes = staffNotes(booking);
 
   return (
     <div>
@@ -148,63 +139,36 @@ function RequestDetail() {
         <section>
           <h3 className="text-base font-semibold">Status timeline</h3>
           <ol className="mt-3 space-y-0">
-            {history.map((event, index) => {
+            {visibleSteps(history).map((event) => {
               const stamp = formatStamp(event.at);
               return (
-                <li key={`${event.at}${event.label}${index}`} className="relative border-l border-white/15 pb-4 pl-4 last:pb-0">
+                <li key={event.label} className="relative border-l border-white/15 pb-4 pl-4 last:pb-0">
                   <span className="absolute -left-[5px] top-1 h-2.5 w-2.5 rounded-full bg-[#5fbb3f]" aria-hidden />
                   <p className="font-semibold">{event.label}</p>
                   <p className="text-[#f4f7f5]">{stamp ? `${stamp.date} · ${stamp.time}` : "Date and time not recorded"}</p>
-                  <p className="text-xs text-[#c5d4cc]">{event.source === "customer" ? "Customer entered" : "SIH&S"}</p>
                 </li>
               );
             })}
           </ol>
         </section>
 
-        <section>
-          <h3 className="text-base font-semibold">Job photos</h3>
-          <p className="mt-1 text-xs text-[#c5d4cc]">Before and after photos are kept on completed jobs.</p>
-          {restricted ? (
-            <p className="mt-3 rounded-[16px] border border-white/15 bg-[#06281f] p-3">Photos are not stored for this service.</p>
-          ) : booking.photoState === "sample" && completed ? (
+        {booking.completionPhotosShared && !restricted && (
+          <section>
+            <h3 className="text-base font-semibold">Completion photos</h3>
+            <p className="mt-1 text-xs font-semibold uppercase tracking-wide text-[#8fd86f]">Shared by SIH&S</p>
             <div className="mt-3 grid grid-cols-2 gap-3">
               {[
-                ["Before", photos[0]],
-                ["After", photos[1]],
-              ].map(([caption, src]) => (
-                <figure key={caption} className="overflow-hidden rounded-[16px] border border-white/15 bg-[#06281f]">
-                  <img src={src} alt={`${caption} sample photo for ${booking.serviceTitle}`} className="h-36 w-full object-cover" />
-                  <figcaption className="px-2 py-2 text-xs font-semibold uppercase tracking-wide text-[#8fd86f]">{caption} · sample</figcaption>
+                ["Shared photo", photos[0]],
+                ["Shared photo", photos[1]],
+              ].map(([caption, src], index) => (
+                <figure key={`${caption}${index}`} className="overflow-hidden rounded-[16px] border border-white/15 bg-[#06281f]">
+                  <img src={src} alt="" className="h-36 w-full object-cover" />
+                  <figcaption className="px-2 py-2 text-xs font-semibold uppercase tracking-wide text-[#8fd86f]">{caption}</figcaption>
                 </figure>
               ))}
             </div>
-          ) : (booking.photoCount ?? 0) > 0 ? (
-            <p className="mt-3 rounded-[16px] border border-white/15 bg-[#06281f] p-3">
-              {booking.photoCount} photos or videos were submitted with this request.
-            </p>
-          ) : (
-            <p className="mt-3 rounded-[16px] border border-dashed border-white/20 bg-[#06281f] p-3 text-[#c5d4cc]">
-              {canceled ? "This job was canceled. Before and after photos were not taken." : completed ? "No before or after photos are on this job." : "Before and after photos are added when SIH&S marks the job completed."}
-            </p>
-          )}
-        </section>
-
-        <section>
-          <h3 className="text-base font-semibold">Staff notes</h3>
-          <ol className="mt-3 space-y-2">
-            {notes.map((note, index) => {
-              const stamp = formatStamp(note.at);
-              return (
-                <li key={`${note.body}${index}`} className="rounded-[16px] border border-white/15 bg-[#06281f] p-3">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-[#8fd86f]">{note.author}</p>
-                  <p className="mt-1">{note.body}</p>
-                  <p className="mt-2 text-xs text-[#c5d4cc]">{stamp ? `${stamp.date} · ${stamp.time}` : "Date and time not recorded"}</p>
-                </li>
-              );
-            })}
-          </ol>
-        </section>
+          </section>
+        )}
 
         <section className="rounded-md border border-border bg-card p-3">
           <h3 className="font-semibold">Scope</h3>
@@ -212,18 +176,71 @@ function RequestDetail() {
           <p className="mt-3 font-semibold">Location</p>
           <p>Property address: {booking.propertyAddress || "Not entered"}</p>
           <p>Actual service location: {booking.serviceLocation || booking.pickupLocation || "Not entered"}</p>
-          <p className="mt-3 font-semibold">Assigned company</p>
+          <Art kind="map" className="mt-3 h-32 w-full rounded-md" />
+          <p className="mt-3 font-semibold">Assigned company or person</p>
           <p>SIH&S. Live worker location is not shown.</p>
-          {booking.customerLabel === "Confirmed—deposit required" && (
-            <p className="mt-3">Estimate only; not a guaranteed arrival time. SIH&S has not published an arrival estimate.</p>
+          {booking.tasks && booking.tasks.length > 0 && (
+            <>
+              <p className="mt-3 font-semibold">Tasks</p>
+              <ul className="mt-1 list-disc pl-5">
+                {booking.tasks.map((task) => (
+                  <li key={task}>{task}</li>
+                ))}
+              </ul>
+            </>
           )}
+          {booking.completionRequirements && booking.completionRequirements.length > 0 && (
+            <>
+              <p className="mt-3 font-semibold">Completion requirements</p>
+              <ul className="mt-1 list-disc pl-5">
+                {booking.completionRequirements.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </>
+          )}
+          {booking.eta && (
+            <p className="mt-3">Estimated arrival: {booking.eta}. Estimate only; not a guaranteed arrival time.</p>
+          )}
+        </section>
+
+        <section className="rounded-md border border-border bg-card p-3">
+          <h3 className="font-semibold">Change history</h3>
+          {(booking.changeHistory ?? []).length === 0 ? (
+            <p className="mt-1 text-muted-foreground">No postponement, cancellation, reassignment, or crew substitution is on this request.</p>
+          ) : (
+            <ol className="mt-2 space-y-2">
+              {booking.changeHistory?.map((entry) => (
+                <li key={`${entry.at}${entry.kind}`}>
+                  <p className="font-semibold">{entry.kind}</p>
+                  <p>{entry.body}</p>
+                  <p className="text-xs text-muted-foreground">{new Date(entry.at).toLocaleString()}</p>
+                </li>
+              ))}
+            </ol>
+          )}
+        </section>
+
+        <section className="rounded-md border border-border bg-card p-3">
+          <h3 className="font-semibold">Documents</h3>
+          <p className="mt-1">Only files SIH&S has released to you appear here. Internal notes, claims, and notary journal entries are not shown.</p>
         </section>
 
         <p className="text-sm text-[#c5d4cc]">Status changes stay on the timeline above. A later change to the place, time, or scope is added there and the original request stays on this record.</p>
 
         <section className="rounded-md border border-border bg-card p-3">
-          <h3 className="font-semibold">Linked work</h3>
-          <p className="mt-1">{booking.serviceTitle} · {label}</p>
+          <h3 className="font-semibold">Linked work orders</h3>
+          <ul className="mt-2 space-y-2">
+            {(booking.linkedWork ?? [{ id: booking.id, service: booking.serviceTitle, status: label }]).map((row) => (
+              <li key={row.id} className="flex items-start justify-between gap-3">
+                <span>
+                  <span className="block font-semibold">{row.id}</span>
+                  <span className="block">{row.service}</span>
+                </span>
+                <span className="rounded-md bg-[#5fbb3f] px-2 py-1 text-xs font-semibold text-[#001e16]">{row.status}</span>
+              </li>
+            ))}
+          </ul>
           <p className="mt-2 text-muted-foreground">Completing one service does not close the whole request.</p>
         </section>
 
@@ -236,8 +253,8 @@ function RequestDetail() {
               <p className="mt-1">You are completing payment through Square-hosted checkout.</p>
               <p className="mt-2">{DEPOSIT_EARNED}</p>
               <p className="mt-1">{REFUND_LINE}</p>
-              <Button type="button" full className="mt-3" onClick={() => recordDeposit(booking.id, "deposit")}>Pay Deposit (Square)</Button>
-              <Button type="button" variant="outline" full className="mt-2" onClick={() => recordDeposit(booking.id, "balance")}>Pay Balance (Square)</Button>
+              <Button type="button" full className="mt-3" onClick={() => { setPayFailed(false); setPayOpen("deposit"); }}>Pay Deposit (Square)</Button>
+              <Button type="button" variant="outline" full className="mt-2" onClick={() => { setPayFailed(false); setPayOpen("balance"); }}>Pay Balance (Square)</Button>
             </>
           ) : (
             <p className="mt-1">
@@ -260,8 +277,8 @@ function RequestDetail() {
           </section>
         )}
 
-        {(booking.serviceSlug === "dna" || booking.serviceSlug === "drug-alcohol") && (
-          <p className="rounded-md border border-border bg-card p-3">Collection completed—laboratory review pending (third party). Results are not shown in the app.</p>
+        {(booking.serviceSlug === "dna" || booking.serviceSlug === "drug-alcohol") && completed && (
+          <p className="rounded-md border border-border bg-card p-3">Collection completed—laboratory review pending (third party).</p>
         )}
 
         {booking.delivered && !booking.acceptedByCustomer && (
@@ -290,15 +307,98 @@ function RequestDetail() {
           <p className="rounded-md border border-border bg-card p-3">A general service request is not sufficient for private-property towing. SIH&S must verify authorization before any vehicle removal.</p>
         )}
 
+        {(booking.syncStatus === "saved-locally" || booking.syncStatus === "uploading") && (
+          <p className="rounded-md border border-border bg-card p-3">
+            {booking.syncStatus === "saved-locally"
+              ? "Saved locally. The request has not been received yet."
+              : "Request received—media upload pending."}{" "}
+            <button type="button" className="font-semibold text-accent-text underline" onClick={() => retrySync(booking.id)}>
+              Retry
+            </button>
+          </p>
+        )}
+
+        {booking.customerLabel === "Needs your input" && (
+          <p className="rounded-md border border-border bg-card p-3">SIH&S needs more information before this request can be confirmed. Add a note below. This does not dispatch staff.</p>
+        )}
+        {booking.customerLabel === "Needs approval" && (
+          <p className="rounded-md border border-border bg-card p-3">This request is above your approval limit. An authorized approver must review it. It is not confirmed.</p>
+        )}
+        {booking.customerLabel === "Approval declined" && (
+          <p className="rounded-md border border-border bg-card p-3">Approval declined. SIH&S has the decision. The request is not confirmed and staff are not dispatched.</p>
+        )}
+
+        {infoOpen && (
+          <form
+            className="rounded-md border border-border bg-card p-3"
+            onSubmit={(event) => {
+              event.preventDefault();
+              if (!info.trim()) return;
+              addInformation(booking.id, info.trim());
+              setInfo("");
+              setInfoOpen(false);
+            }}
+          >
+            <label className="block text-sm font-semibold" htmlFor="add-info">Add information</label>
+            <textarea id="add-info" className="mt-2 min-h-24 w-full rounded-md border border-border bg-transparent p-2" value={info} onChange={(event) => setInfo(event.target.value)} />
+            <Button type="submit" className="mt-2">Save note</Button>
+          </form>
+        )}
+        {followUpId && <p role="status">Return visit {followUpId} is received and pending SIH&S confirmation.</p>}
+
         <div className="space-y-2">
+          <Button type="button" variant="outline" full onClick={() => setInfoOpen(true)}>Add Information</Button>
           <CallHook />
-          <button type="button" className="min-h-11 font-semibold text-accent-text underline" onClick={() => navigate({ to: "/incident" })}>Report a concern</button>
+          <button type="button" className="min-h-11 font-semibold text-accent-text underline" onClick={() => navigate({ to: "/incident" })}>Report a Concern</button>
           {booking.status !== "completed" && booking.status !== "canceled" && booking.status !== "cancellation-requested" && (
-            <button type="button" className="block min-h-11 font-semibold text-danger underline" onClick={() => setCancelOpen(true)}>Request cancellation</button>
+            <button type="button" className="block min-h-11 font-semibold text-danger underline" onClick={() => setCancelOpen(true)}>Request Cancellation</button>
+          )}
+          {completed && (
+            <Button
+              type="button"
+              full
+              disabled={Boolean(followUpId)}
+              onClick={() => setFollowUpId(requestFollowUp(booking.id))}
+            >
+              Request Return Visit / Report an Issue
+            </Button>
           )}
           <Button type="button" variant="outline" full onClick={() => navigate({ to: "/home" })}>Return Home</Button>
         </div>
       </div>
+      {payOpen && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50" role="dialog" aria-modal="true" aria-labelledby="pay-title">
+          <div className="w-full max-w-[480px] rounded-t-[16px] bg-[#06281f] p-4">
+            <h2 id="pay-title" className="text-xl font-semibold">{payOpen === "deposit" ? "Pay Deposit (Square)" : "Pay Balance (Square)"}</h2>
+            <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Powered by Square</p>
+            <p className="mt-2 text-sm">You are completing payment through Square-hosted checkout. No card number is entered in SIH&S.</p>
+            {payFailed && (
+              <p className="mt-3 rounded-md border border-border p-3 text-sm" role="alert">
+                Payment not completed through Square. Retry, or call SIH&S. The request stays unconfirmed until payment is finished.
+              </p>
+            )}
+            <Button
+              type="button"
+              full
+              className="mt-4"
+              onClick={() => {
+                recordDeposit(booking.id, payOpen);
+                setPayOpen(null);
+                setPayFailed(false);
+              }}
+            >
+              Continue in Square
+            </Button>
+            <button type="button" className="mt-2 min-h-11 w-full font-semibold" onClick={() => setPayFailed(true)}>
+              Payment not completed
+            </button>
+            <div className="mt-2">
+              <CallHook />
+            </div>
+            <button type="button" className="mt-1 min-h-11 w-full" onClick={() => setPayOpen(null)}>Close</button>
+          </div>
+        </div>
+      )}
       {cancelOpen && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50" role="dialog" aria-modal="true">
           <div className="w-full max-w-[480px] rounded-t-[16px] bg-[#06281f] p-4">

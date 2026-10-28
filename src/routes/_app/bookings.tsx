@@ -77,7 +77,7 @@ function Bookings() {
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <p className="text-xs text-[#c5d4cc]">{booking.id}</p>
-                  <h2 className="text-base font-semibold">{booking.serviceTitle}</h2>
+                  <p className="mt-1 inline-flex rounded-md border border-white/20 px-2 py-1 text-xs font-semibold">{booking.serviceTitle}</p>
                 </div>
                 <span className="shrink-0 rounded-md bg-[#5fbb3f] px-2 py-1 text-xs font-semibold text-[#001e16]">
                   {customerStatusLabel(booking.status, booking.customerLabel)}
@@ -85,21 +85,19 @@ function Bookings() {
               </div>
               <dl className="mt-3 space-y-1 text-sm">
                 <div className="flex justify-between gap-3">
-                  <dt className="text-[#c5d4cc]">Organization</dt>
-                  <dd className="text-right">{booking.organizationLabel || booking.area}</dd>
+                  <dt className="text-[#c5d4cc]">Property</dt>
+                  <dd className="text-right">{booking.propertyAddress || booking.organizationLabel || "Not entered"}</dd>
                 </div>
                 <div className="flex justify-between gap-3">
-                  <dt className="text-[#c5d4cc]">Location</dt>
+                  <dt className="text-[#c5d4cc]">Service location</dt>
                   <dd className="text-right">{booking.serviceLocation || booking.pickupLocation || "Not entered"}</dd>
                 </div>
-                {booking.vehicleSummary && (
-                  <div className="flex justify-between gap-3">
-                    <dt className="text-[#c5d4cc]">Vehicle</dt>
-                    <dd className="text-right">{booking.vehicleSummary}</dd>
-                  </div>
-                )}
                 <div className="flex justify-between gap-3">
-                  <dt className="text-[#c5d4cc]">{booking.status === "canceled" ? "Canceled" : booking.status === "completed" ? "Completed" : "Updated"}</dt>
+                  <dt className="text-[#c5d4cc]">Preferred or scheduled time</dt>
+                  <dd className="text-right">{booking.preferredTiming || booking.when}</dd>
+                </div>
+                <div className="flex justify-between gap-3">
+                  <dt className="text-[#c5d4cc]">Last update</dt>
                   <dd className="text-right">{updated ? new Date(updated).toLocaleString() : booking.when}</dd>
                 </div>
               </dl>

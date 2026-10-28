@@ -2,11 +2,12 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import bgTow from "@/img/bg-onboard-tow.jpg";
 import bgLab from "@/img/bg-onboard-lab.jpg";
-import bgDelaware from "@/img/bg-onboard-delaware.jpg";
+import photoDocs from "@/img/photo-docs.jpg";
+import { CallHook } from "@/components/Chrome";
 import { useApp } from "@/lib/store";
 
 export const Route = createFileRoute("/onboarding")({
-  head: () => ({ meta: [{ title: "SIH&S — Structured Incident Response" }] }),
+  head: () => ({ meta: [{ title: "SIH&S — Staff" }] }),
   component: Onboarding,
 });
 
@@ -14,27 +15,27 @@ const STEPS = [
   {
     photo: bgTow,
     focus: "center 42%",
-    artLabel: "Dark green light-duty tow truck outside a service building",
-    kicker: "Services",
-    title: "Structured Incident Response",
-    services: ["Delaware Intrastate Towing", "Regulated Collections", "DNA Services", "PIM-VEE™", "Notary"],
+    artLabel: "Green tow truck ready for an SIH&S staff assignment",
+    kicker: "Staff home",
+    title: "Start with the assignment in front of you",
+    services: ["Today's job", "Your approved role", "Next action"],
   },
   {
     photo: bgLab,
     focus: "center 35%",
-    artLabel: "Specimen vials and a clipboard on a collection bench",
-    kicker: "Collections",
-    title: "Regulated. Documented. Accountable.",
-    body: "Chain-of-custody collections, incident documentation, and notarial services performed to a documented standard.",
+    artLabel: "Collection bench with vials and a clipboard for staff documentation",
+    kicker: "On the job",
+    title: "Record the work. Dispatch decides.",
+    body: "Travel, arrival, photos, and completion stay on the record with their source. You submit the work. You do not approve it.",
   },
   {
-    photo: bgDelaware,
-    focus: "center",
-    artLabel: "Aerial view of Northern New Castle County along the Delaware River",
-    kicker: "Service area",
-    title: "Serving Northern New Castle County, Delaware",
-    body: "Availability varies by service, staffing, location, and dispatch capacity. Delaware intrastate towing only; interstate moves coordinated through authorized carriers.",
-    badge: "24/7",
+    photo: photoDocs,
+    focus: "center 40%",
+    artLabel: "Clipboard and pen on a vehicle hood for a staff field record",
+    kicker: "Access",
+    title: "SIH&S approves your roles",
+    body: "Ask for the work you are qualified to do. Jobs and records stay closed until an SIH&S admin approves your account.",
+    badge: "Pending until approved",
   },
 ];
 
@@ -106,6 +107,9 @@ function Onboarding() {
         >
           {last ? "Get Started" : "Next"}
         </button>
+        <div className="mt-2 flex justify-center">
+          <CallHook dark />
+        </div>
       </div>
     </div>
   );

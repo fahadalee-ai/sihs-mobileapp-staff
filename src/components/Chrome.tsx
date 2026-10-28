@@ -1,5 +1,5 @@
-import { Link, useCanGoBack, useRouter, useRouterState } from "@tanstack/react-router";
-import { ArrowLeft, Calendar, Home, MapPin, Phone, User } from "lucide-react";
+import { Link, useRouterState } from "@tanstack/react-router";
+import { ChevronLeft, ClipboardList, Home, Phone, ShieldAlert, User, Briefcase } from "lucide-react";
 import type { ReactNode } from "react";
 import { LEGAL_LINKS, PHONE_DISPLAY, PHONE_TEL, type LegalId } from "@/lib/content";
 import { useApp } from "@/lib/store";
@@ -7,8 +7,9 @@ import { cn } from "@/lib/utils";
 
 const TABS = [
   { to: "/home", label: "Home", icon: Home },
-  { to: "/bookings", label: "Requests", icon: Calendar },
-  { to: "/location", label: "Service area", icon: MapPin },
+  { to: "/jobs", label: "Jobs", icon: Briefcase },
+  { to: "/log", label: "Daily Log", icon: ClipboardList },
+  { to: "/report", label: "Report", icon: ShieldAlert },
   { to: "/profile", label: "Profile", icon: User },
 ] as const;
 
@@ -17,7 +18,7 @@ export function TabBar() {
   return (
     <nav
       aria-label="Primary"
-      className="sticky bottom-0 z-40 grid grid-cols-4 border-t border-[#4eae34] bg-[#5fbb3f] pb-[max(0.25rem,env(safe-area-inset-bottom))] text-[#001e16]"
+      className="z-40 grid shrink-0 grid-cols-5 border-t border-[#4eae34] bg-[#5fbb3f] pb-[max(0.25rem,env(safe-area-inset-bottom))] text-[#001e16]"
     >
       {TABS.map((tab) => {
         const active = pathname === tab.to;
@@ -27,7 +28,7 @@ export function TabBar() {
             key={tab.to}
             to={tab.to}
             aria-current={active ? "page" : undefined}
-            className="flex min-h-14 flex-col items-center justify-center gap-0.5 text-[11px] font-semibold text-[#001e16]"
+            className="flex min-h-14 flex-col items-center justify-center gap-0.5 px-0.5 text-center text-[10px] font-semibold leading-tight text-[#001e16]"
           >
             <span
               className={cn(
@@ -45,37 +46,56 @@ export function TabBar() {
   );
 }
 
+const BACK_LABEL: Record<string, string> = {
+  "/jobs": "Jobs",
+  "/home": "Home",
+  "/profile": "Profile",
+  "/report": "Report",
+  "/login": "Sign In",
+};
+
+function BackLink({ to, label }: { to: string; label: string }) {
+  const className = "relative z-10 flex h-11 max-w-[40%] items-center gap-0.5 pl-1 pr-2 text-[17px] font-normal text-[#8fd86f]";
+  const content = (
+    <>
+      <ChevronLeft size={28} strokeWidth={2.25} aria-hidden />
+      <span className="truncate">{label}</span>
+    </>
+  );
+  if (to === "/jobs") return <Link to="/jobs" aria-label={`Back to ${label}`} className={className}>{content}</Link>;
+  if (to === "/home") return <Link to="/home" aria-label={`Back to ${label}`} className={className}>{content}</Link>;
+  if (to === "/profile") return <Link to="/profile" aria-label={`Back to ${label}`} className={className}>{content}</Link>;
+  if (to === "/report") return <Link to="/report" aria-label={`Back to ${label}`} className={className}>{content}</Link>;
+  if (to === "/login") return <Link to="/login" aria-label={`Back to ${label}`} className={className}>{content}</Link>;
+  return <a href={to} aria-label={`Back to ${label}`} className={className}>{content}</a>;
+}
+
 export function ScreenHeader({
   title,
   backTo = "/home",
+  backLabel,
   dark,
   menu,
 }: {
   title: string;
   backTo?: string;
+  backLabel?: string;
   dark?: boolean;
   menu?: ReactNode;
 }) {
-  const router = useRouter();
-  const canGoBack = useCanGoBack();
+  const label = backLabel ?? BACK_LABEL[backTo] ?? "Back";
   return (
     <header
       className={cn(
-        "sticky top-0 z-30 flex items-center gap-2 px-3 pt-[max(0.5rem,env(safe-area-inset-top))] pb-3",
-        "bg-[#001e16]",
+        "sticky top-0 z-30 border-b border-white/10 bg-[#001e16] px-2 pt-[max(1rem,env(safe-area-inset-top))] pb-4",
         dark ? "text-white" : "text-[#f4f7f5]",
       )}
     >
-      <button
-        type="button"
-        aria-label="Go back"
-        onClick={() => (canGoBack ? router.history.back() : router.navigate({ to: backTo }))}
-        className="flex h-11 w-11 items-center justify-center"
-      >
-        <ArrowLeft size={22} aria-hidden />
-      </button>
-      <h1 className="flex-1 truncate text-center text-base font-semibold">{title}</h1>
-      <div className="flex h-11 w-11 items-center justify-center">{menu}</div>
+      <div className="relative flex h-11 items-center py-1">
+        <BackLink to={backTo} label={label} />
+        <h1 className="pointer-events-none absolute inset-x-16 truncate text-center text-[17px] font-semibold">{title}</h1>
+        <div className="relative z-10 ml-auto flex h-11 w-11 items-center justify-center">{menu}</div>
+      </div>
     </header>
   );
 }

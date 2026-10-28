@@ -73,6 +73,13 @@ export type Booking = {
   photoCount?: number;
   photoState?: "sample" | "customer" | "none";
   detailSummary?: string;
+  changeHistory?: { at: string; kind: string; body: string }[];
+  linkedWork?: { id: string; service: string; status: string }[];
+  tasks?: string[];
+  completionRequirements?: string[];
+  eta?: string;
+  completionPhotosShared?: boolean;
+  customerNotes?: { at: string; body: string }[];
 };
 
 export type IncidentReport = {
@@ -145,6 +152,7 @@ type Store = {
     photoCount?: number;
     detailSummary?: string;
     vehicleSummary?: string;
+    mediaPending?: boolean;
   }) => { id: string; duplicate: boolean };
   recordDeposit: (id: string, kind: "deposit" | "balance") => void;
   acceptDelivery: (id: string) => void;
@@ -154,6 +162,10 @@ type Store = {
   requestOrganizationAccess: (input: { organization: string; property: string; note: string }) => void;
   changePassword: (current: string, next: string) => { ok: true } | { ok: false; reason: string };
   submitIncident: (input: { type: string; details: string; restricted: boolean; requestId?: string }) => string;
+  addInformation: (id: string, note: string) => void;
+  retrySync: (id: string) => boolean;
+  decideApproval: (id: string, decision: "approved" | "declined", note: string) => void;
+  requestFollowUp: (id: string) => string;
   pushToast: (title: string, body?: string) => void;
   dismissToast: (id: number) => void;
 };
@@ -182,6 +194,7 @@ const SAMPLE_JOBS: Booking[] = [
     serviceTitle: "Delaware Intrastate Towing",
     status: "completed",
     photoState: "sample",
+    completionPhotosShared: true,
     customerLabel: "Completed",
     area: "Northern New Castle County, DE",
     when: "Completed Oct 12, 2026 · 10:22 AM",
@@ -218,6 +231,7 @@ const SAMPLE_JOBS: Booking[] = [
     serviceTitle: "Vehicle Lockout",
     status: "completed",
     photoState: "sample",
+    completionPhotosShared: true,
     customerLabel: "Completed",
     area: "Northern New Castle County, DE",
     when: "Completed Oct 8, 2026 · 4:05 PM",
@@ -316,11 +330,26 @@ const SAMPLE_JOBS: Booking[] = [
 ];
 
 function withSampleJobs(list: Booking[]): Booking[] {
-  const ids = new Set(list.map((job) => job.id));
-  const catalog = [ACTIVE_SAMPLE, ...SAMPLE_JOBS];
-  const missing = catalog.filter((job) => !ids.has(job.id));
-  if (!missing.length) return list;
-  return [...list, ...missing];
+  const catalog = [ACTIVE_SAMPLE, ...SAMPLE_JOBS, ...EXTRA_SAMPLES];
+  const merged = catalog.map((sample) => {
+    const current = list.find((job) => job.id === sample.id);
+    if (!current) return sample;
+    return {
+      ...sample,
+      ...current,
+      completionPhotosShared: current.completionPhotosShared ?? sample.completionPhotosShared,
+      changeHistory: current.changeHistory ?? sample.changeHistory,
+      linkedWork: current.linkedWork ?? sample.linkedWork,
+      tasks: current.tasks ?? sample.tasks,
+      completionRequirements: current.completionRequirements ?? sample.completionRequirements,
+      eta: current.eta ?? sample.eta,
+      delivered: current.delivered ?? sample.delivered,
+      acceptedByCustomer: current.acceptedByCustomer ?? sample.acceptedByCustomer,
+      sharedTitle: current.sharedTitle ?? sample.sharedTitle,
+    };
+  });
+  const ids = new Set(catalog.map((job) => job.id));
+  return [...merged, ...list.filter((job) => !ids.has(job.id))];
 }
 
 const DEFAULT_LOCATIONS: SavedLocation[] = [
@@ -356,6 +385,163 @@ const ACTIVE_SAMPLE: Booking = {
     { at: "2026-10-14T15:40:00.000Z", label: "Confirmed—deposit required", source: "sihs" },
   ],
 };
+
+const EXTRA_SAMPLES: Booking[] = [
+  {
+    id: "SIHS-660214",
+    serviceSlug: "lockouts",
+    serviceTitle: "Vehicle Lockout",
+    status: "pending",
+    customerLabel: "Needs your input",
+    area: "Northern New Castle County, DE",
+    when: "Preferred: Today, afternoon. Not a confirmed appointment.",
+    preferredTiming: "Today, afternoon",
+    callback: "(302) 406-4665",
+    propertyAddress: "1007 N. Market St., Wilmington, DE 19801",
+    serviceLocation: "Visitor lot, row C",
+    organizationLabel: "Northern New Castle Properties",
+    requesterName: "Susan Hooks",
+    vehicleSummary: "2021 Honda Civic · Gray",
+    scope: "Unlock the driver door. SIH&S needs the license plate before confirming.",
+    syncStatus: "received",
+    statusHistory: [
+      { at: "2026-10-15T16:05:00.000Z", label: "Received—pending confirmation", source: "customer" },
+      { at: "2026-10-15T16:40:00.000Z", label: "Needs your input", source: "sihs" },
+    ],
+  },
+  {
+    id: "SIHS-770331",
+    serviceSlug: "towing",
+    serviceTitle: "Delaware Intrastate Towing",
+    status: "ongoing",
+    customerLabel: "Updated (postponed or reassigned)",
+    area: "Northern New Castle County, DE",
+    when: "Preferred window moved to Oct 16, afternoon. Not a confirmed appointment.",
+    preferredTiming: "Oct 16, afternoon",
+    callback: "(302) 406-4665",
+    propertyAddress: "800 N. French St., Wilmington, DE 19801",
+    serviceLocation: "Street parking, French Street",
+    organizationLabel: "Northern New Castle Properties",
+    requesterName: "Susan Hooks",
+    vehicleSummary: "2016 Honda Accord · Black · Plate DE-7730",
+    scope: "Light-duty tow. Original assignment remains on this record.",
+    eta: "About 45 minutes after dispatch",
+    syncStatus: "received",
+    statusHistory: [
+      { at: "2026-10-15T13:10:00.000Z", label: "Received—pending confirmation", source: "customer" },
+      { at: "2026-10-15T13:40:00.000Z", label: "Reviewed", source: "sihs" },
+      { at: "2026-10-15T14:05:00.000Z", label: "Confirmed", source: "sihs" },
+      { at: "2026-10-15T14:20:00.000Z", label: "Assigned", source: "sihs" },
+      { at: "2026-10-15T18:12:00.000Z", label: "Updated (postponed or reassigned)", source: "sihs" },
+    ],
+    changeHistory: [
+      { at: "2026-10-15T14:20:00.000Z", kind: "Assignment", body: "Original assignment: SIH&S crew A. This entry stays on the record." },
+      { at: "2026-10-15T17:02:00.000Z", kind: "Crew substitution", body: "SIH&S substituted crew B. Crew A remains listed above." },
+      { at: "2026-10-15T18:12:00.000Z", kind: "Postponement", body: "SIH&S postponed the preferred window to Oct 16, afternoon." },
+      { at: "2026-10-15T18:12:00.000Z", kind: "Reassignment", body: "Request reassigned within SIH&S. Live worker location is not shown." },
+    ],
+    linkedWork: [
+      { id: "SIHS-770331-A", service: "Delaware Intrastate Towing", status: "Updated (postponed or reassigned)" },
+      { id: "SIHS-770331-B", service: "Vehicle Lockout", status: "Received—pending confirmation" },
+    ],
+  },
+  {
+    id: "SIHS-880442",
+    serviceSlug: "courier",
+    serviceTitle: "Courier or Product Delivery",
+    status: "ongoing",
+    customerLabel: "Delivered",
+    area: "Northern New Castle County, DE",
+    when: "Preferred: Oct 15, morning. Not a confirmed appointment.",
+    preferredTiming: "Oct 15, morning",
+    callback: "(302) 406-4665",
+    propertyAddress: "1201 N. Orange St., Wilmington, DE 19801",
+    serviceLocation: "Suite 7724 reception",
+    organizationLabel: "Northern New Castle Properties",
+    requesterName: "Susan Hooks",
+    scope: "Deliver two boxes of office supplies. Substitutions were not allowed.",
+    delivered: true,
+    acceptedByCustomer: false,
+    syncStatus: "received",
+    tasks: ["Pick up the labeled boxes", "Deliver to Suite 7724 reception"],
+    completionRequirements: ["Recipient name recorded", "Customer acceptance is a separate step"],
+    statusHistory: [
+      { at: "2026-10-15T12:00:00.000Z", label: "Received—pending confirmation", source: "customer" },
+      { at: "2026-10-15T13:10:00.000Z", label: "Confirmed", source: "sihs" },
+      { at: "2026-10-15T15:40:00.000Z", label: "Delivered", source: "sihs" },
+    ],
+  },
+  {
+    id: "SIHS-990118",
+    serviceSlug: "pim-vee",
+    serviceTitle: "PIM-VEE™",
+    status: "completed",
+    customerLabel: "Completed",
+    area: "Northern New Castle County, DE",
+    when: "Completed Oct 11, 2026 · 3:15 PM",
+    preferredTiming: "Oct 11, afternoon",
+    callback: "(302) 406-4665",
+    propertyAddress: "222 Delaware Ave., Wilmington, DE 19801",
+    serviceLocation: "Garage level 1",
+    organizationLabel: "Northern New Castle Properties",
+    requesterName: "Susan Hooks",
+    scope: "Neutral, factual documentation. This record does not determine fault.",
+    sharedTitle: "PIM-VEE™ documentation package",
+    syncStatus: "received",
+    statusHistory: [
+      { at: "2026-10-11T16:00:00.000Z", label: "Received—pending confirmation", source: "customer" },
+      { at: "2026-10-11T17:20:00.000Z", label: "Confirmed", source: "sihs" },
+      { at: "2026-10-11T19:15:00.000Z", label: "Completed", source: "sihs" },
+    ],
+  },
+  {
+    id: "SIHS-101055",
+    serviceSlug: "janitorial",
+    serviceTitle: "Janitorial",
+    status: "pending",
+    customerLabel: "Needs approval",
+    area: "Northern New Castle County, DE",
+    when: "Preferred: Flexible. Not a confirmed appointment.",
+    preferredTiming: "Flexible",
+    callback: "(302) 406-4665",
+    propertyAddress: "1201 N. Orange St., Suite 7724, Wilmington, DE 19801",
+    serviceLocation: "Floors 1 and 2, excluding the server room",
+    organizationLabel: "Northern New Castle Properties",
+    requesterName: "Susan Hooks",
+    quote: "Estimated cost $1,200. Above the $500 approval limit.",
+    scope: "Janitorial service for floors 1 and 2. Server room is a no-photo area.",
+    poNumber: "PO-2041",
+    syncStatus: "received",
+    tasks: ["Common areas", "Restrooms"],
+    completionRequirements: ["Skip no-photo areas", "Leave a completion note"],
+    statusHistory: [
+      { at: "2026-10-15T11:00:00.000Z", label: "Received—pending confirmation", source: "customer" },
+      { at: "2026-10-15T11:20:00.000Z", label: "Needs approval", source: "sihs" },
+    ],
+  },
+  {
+    id: "SIHS-112266",
+    serviceSlug: "dna",
+    serviceTitle: "DNA Services",
+    status: "completed",
+    customerLabel: "Completed",
+    area: "Northern New Castle County, DE",
+    when: "Collection completed Oct 9, 2026",
+    preferredTiming: "Preferred appointment time: Oct 9, 9:00 AM",
+    callback: "(302) 406-4665",
+    propertyAddress: "1201 N. Orange St., Wilmington, DE 19801",
+    serviceLocation: "In-office, Wilmington",
+    organizationLabel: "Northern New Castle Properties",
+    requesterName: "Susan Hooks",
+    scope: "Specimen collection only. Results are not shown in the app.",
+    syncStatus: "received",
+    statusHistory: [
+      { at: "2026-10-08T15:00:00.000Z", label: "Appointment requested—pending SIH&S confirmation.", source: "customer" },
+      { at: "2026-10-08T18:00:00.000Z", label: "Confirmed", source: "sihs" },
+      { at: "2026-10-09T13:10:00.000Z", label: "Completed", source: "sihs" },
+    ],
+  },
+];
 
 function loadScopedBookings(userId: string | null, isGuest: boolean): Booking[] {
   const key = isGuest || !userId ? "bookings:guest" : `bookings:${userId}`;
@@ -662,7 +848,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           scope: input.description || input.vehicle?.notes,
           authorizationPending: input.authorizationPending,
           requestType: input.requestType ?? "listed",
-          syncStatus: input.offline ? "saved-locally" : "received",
+          syncStatus: input.offline ? "saved-locally" : input.mediaPending ? "uploading" : "received",
           statusHistory: [{ at: new Date().toISOString(), label, source: "customer" }],
         };
         saveBookings([booking, ...bookings]);
@@ -794,12 +980,88 @@ export function AppProvider({ children }: { children: ReactNode }) {
       changePassword: (current, nextPassword) => {
         if (!user) return { ok: false as const, reason: "Sign in required." };
         if (current !== user.password) return { ok: false as const, reason: "Current password is incorrect." };
-        if (nextPassword.trim().length < 8) return { ok: false as const, reason: "Use at least 8 characters." };
+        if (nextPassword.trim().length < 8 || !/\d/.test(nextPassword)) {
+          return { ok: false as const, reason: "Use at least 8 characters, including a number." };
+        }
         const next = { ...user, password: nextPassword };
         setUser(next);
         persistUsers(users.map((u) => (u.id === next.id ? next : u)));
         pushToast("Password updated");
         return { ok: true as const };
+      },
+      retrySync: (id) => {
+        const online = typeof navigator === "undefined" || navigator.onLine;
+        const next = bookings.map((booking) =>
+          booking.id === id
+            ? { ...booking, syncStatus: online ? ("received" as const) : ("saved-locally" as const) }
+            : booking,
+        );
+        saveBookings(next);
+        return online;
+      },
+      addInformation: (id, note) => {
+        const next = bookings.map((booking) =>
+          booking.id === id
+            ? {
+                ...booking,
+                customerNotes: [...(booking.customerNotes ?? []), { at: new Date().toISOString(), body: note }],
+                statusHistory: [
+                  ...(booking.statusHistory ?? []),
+                  { at: new Date().toISOString(), label: "Information added", source: "customer" as const },
+                ],
+              }
+            : booking,
+        );
+        saveBookings(next);
+      },
+      decideApproval: (id, decision, note) => {
+        const next = bookings.map((booking) =>
+          booking.id === id
+            ? {
+                ...booking,
+                customerLabel: decision === "approved" ? "Received—pending confirmation" : "Approval declined",
+                statusHistory: [
+                  ...(booking.statusHistory ?? []),
+                  {
+                    at: new Date().toISOString(),
+                    label:
+                      decision === "approved"
+                        ? "Approved by an authorized approver. Still pending SIH&S confirmation."
+                        : "Approval declined.",
+                    source: "customer" as const,
+                  },
+                ],
+                customerNotes: note.trim()
+                  ? [...(booking.customerNotes ?? []), { at: new Date().toISOString(), body: note.trim() }]
+                  : booking.customerNotes,
+              }
+            : booking,
+        );
+        saveBookings(next);
+      },
+      requestFollowUp: (id) => {
+        const source = bookings.find((booking) => booking.id === id);
+        const followId = `SIHS-${Date.now().toString().slice(-6)}`;
+        const booking: Booking = {
+          id: followId,
+          serviceSlug: source?.serviceSlug ?? "other",
+          serviceTitle: source?.serviceTitle ?? "Return visit",
+          status: "pending",
+          customerLabel: "Received—pending confirmation",
+          area: source?.area ?? "Northern New Castle County, DE",
+          when: "Preferred: return visit. Not a confirmed appointment.",
+          preferredTiming: "Return visit",
+          callback: source?.callback,
+          requesterName: source?.requesterName,
+          organizationLabel: source?.organizationLabel,
+          propertyAddress: source?.propertyAddress,
+          serviceLocation: source?.serviceLocation,
+          scope: `Return visit requested for ${id}. Submitting this request does not dispatch staff.`,
+          syncStatus: "received",
+          statusHistory: [{ at: new Date().toISOString(), label: "Received—pending confirmation", source: "customer" }],
+        };
+        saveBookings([booking, ...bookings]);
+        return followId;
       },
       submitIncident: ({ type, details, restricted, requestId }) => {
         const id = `INC-${Date.now().toString().slice(-6)}`;
