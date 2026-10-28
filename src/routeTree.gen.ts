@@ -17,35 +17,19 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as MoreInfoRouteImport } from './routes/more-info'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as PendingRouteImport } from './routes/pending'
-import { Route as ReadyRouteImport } from './routes/ready'
 import { Route as RejectedRouteImport } from './routes/rejected'
 import { Route as RevokedRouteImport } from './routes/revoked'
-import { Route as SessionRouteImport } from './routes/session'
 import { Route as SetupRouteImport } from './routes/setup'
-import { Route as SignupRouteImport } from './routes/signup'
-import { Route as VerifyRouteImport } from './routes/verify'
-import { Route as AppAccessRouteImport } from './routes/_app/access'
-import { Route as AppBookingsRouteImport } from './routes/_app/bookings'
-import { Route as AppConfirmationRouteImport } from './routes/_app/confirmation'
-import { Route as AppDepositRouteImport } from './routes/_app/deposit'
-import { Route as AppDocumentsRouteImport } from './routes/_app/documents'
 import { Route as AppExceptionsRouteImport } from './routes/_app/exceptions'
 import { Route as AppHomeRouteImport } from './routes/_app/home'
-import { Route as AppIncidentRouteImport } from './routes/_app/incident'
 import { Route as AppJobsRouteImport } from './routes/_app/jobs'
-import { Route as AppLocationRouteImport } from './routes/_app/location'
-import { Route as AppLocationsRouteImport } from './routes/_app/locations'
 import { Route as AppLogRouteImport } from './routes/_app/log'
 import { Route as AppNotificationsRouteImport } from './routes/_app/notifications'
-import { Route as AppOrganizationRouteImport } from './routes/_app/organization'
 import { Route as AppPasswordRouteImport } from './routes/_app/password'
-import { Route as AppPaymentRouteImport } from './routes/_app/payment'
 import { Route as AppProfileRouteImport } from './routes/_app/profile'
 import { Route as AppProfileEditRouteImport } from './routes/_app/profile-edit'
-import { Route as AppPropertiesRouteImport } from './routes/_app/properties'
 import { Route as AppQualificationsRouteImport } from './routes/_app/qualifications'
 import { Route as AppReportRouteImport } from './routes/_app/report'
-import { Route as AppRequestRouteImport } from './routes/_app/request'
 import { Route as AppRolesRouteImport } from './routes/_app/roles'
 import { Route as AppSyncRouteImport } from './routes/_app/sync'
 import { Route as AppTrackingRouteImport } from './routes/_app/tracking'
@@ -54,9 +38,7 @@ import { Route as LegalDocRouteImport } from './routes/legal/$doc'
 import { Route as AppFieldIdRouteImport } from './routes/_app/field.$id'
 import { Route as AppJobsIdRouteImport } from './routes/_app/jobs.$id'
 import { Route as AppPimIdRouteImport } from './routes/_app/pim.$id'
-import { Route as AppRequestsIdRouteImport } from './routes/_app/requests/$id'
 import { Route as AppServiceIdRouteImport } from './routes/_app/service.$id'
-import { Route as AppServicesSlugRouteImport } from './routes/_app/services/$slug'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -97,11 +79,6 @@ const PendingRoute = PendingRouteImport.update({
   path: '/pending',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ReadyRoute = ReadyRouteImport.update({
-  id: '/ready',
-  path: '/ready',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const RejectedRoute = RejectedRouteImport.update({
   id: '/rejected',
   path: '/rejected',
@@ -112,50 +89,10 @@ const RevokedRoute = RevokedRouteImport.update({
   path: '/revoked',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SessionRoute = SessionRouteImport.update({
-  id: '/session',
-  path: '/session',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const SetupRoute = SetupRouteImport.update({
   id: '/setup',
   path: '/setup',
   getParentRoute: () => rootRouteImport,
-} as any)
-const SignupRoute = SignupRouteImport.update({
-  id: '/signup',
-  path: '/signup',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const VerifyRoute = VerifyRouteImport.update({
-  id: '/verify',
-  path: '/verify',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AppAccessRoute = AppAccessRouteImport.update({
-  id: '/access',
-  path: '/access',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppBookingsRoute = AppBookingsRouteImport.update({
-  id: '/bookings',
-  path: '/bookings',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppConfirmationRoute = AppConfirmationRouteImport.update({
-  id: '/confirmation',
-  path: '/confirmation',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppDepositRoute = AppDepositRouteImport.update({
-  id: '/deposit',
-  path: '/deposit',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppDocumentsRoute = AppDocumentsRouteImport.update({
-  id: '/documents',
-  path: '/documents',
-  getParentRoute: () => AppRoute,
 } as any)
 const AppExceptionsRoute = AppExceptionsRouteImport.update({
   id: '/exceptions',
@@ -167,24 +104,9 @@ const AppHomeRoute = AppHomeRouteImport.update({
   path: '/home',
   getParentRoute: () => AppRoute,
 } as any)
-const AppIncidentRoute = AppIncidentRouteImport.update({
-  id: '/incident',
-  path: '/incident',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppJobsRoute = AppJobsRouteImport.update({
   id: '/jobs',
   path: '/jobs',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppLocationRoute = AppLocationRouteImport.update({
-  id: '/location',
-  path: '/location',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppLocationsRoute = AppLocationsRouteImport.update({
-  id: '/locations',
-  path: '/locations',
   getParentRoute: () => AppRoute,
 } as any)
 const AppLogRoute = AppLogRouteImport.update({
@@ -197,19 +119,9 @@ const AppNotificationsRoute = AppNotificationsRouteImport.update({
   path: '/notifications',
   getParentRoute: () => AppRoute,
 } as any)
-const AppOrganizationRoute = AppOrganizationRouteImport.update({
-  id: '/organization',
-  path: '/organization',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppPasswordRoute = AppPasswordRouteImport.update({
   id: '/password',
   path: '/password',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppPaymentRoute = AppPaymentRouteImport.update({
-  id: '/payment',
-  path: '/payment',
   getParentRoute: () => AppRoute,
 } as any)
 const AppProfileRoute = AppProfileRouteImport.update({
@@ -222,11 +134,6 @@ const AppProfileEditRoute = AppProfileEditRouteImport.update({
   path: '/profile-edit',
   getParentRoute: () => AppRoute,
 } as any)
-const AppPropertiesRoute = AppPropertiesRouteImport.update({
-  id: '/properties',
-  path: '/properties',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppQualificationsRoute = AppQualificationsRouteImport.update({
   id: '/qualifications',
   path: '/qualifications',
@@ -235,11 +142,6 @@ const AppQualificationsRoute = AppQualificationsRouteImport.update({
 const AppReportRoute = AppReportRouteImport.update({
   id: '/report',
   path: '/report',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppRequestRoute = AppRequestRouteImport.update({
-  id: '/request',
-  path: '/request',
   getParentRoute: () => AppRoute,
 } as any)
 const AppRolesRoute = AppRolesRouteImport.update({
@@ -282,19 +184,9 @@ const AppPimIdRoute = AppPimIdRouteImport.update({
   path: '/pim/$id',
   getParentRoute: () => AppRoute,
 } as any)
-const AppRequestsIdRoute = AppRequestsIdRouteImport.update({
-  id: '/requests/$id',
-  path: '/requests/$id',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppServiceIdRoute = AppServiceIdRouteImport.update({
   id: '/service/$id',
   path: '/service/$id',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppServicesSlugRoute = AppServicesSlugRouteImport.update({
-  id: '/services/$slug',
-  path: '/services/$slug',
   getParentRoute: () => AppRoute,
 } as any)
 
@@ -306,35 +198,19 @@ export interface FileRoutesByFullPath {
   '/more-info': typeof MoreInfoRoute
   '/onboarding': typeof OnboardingRoute
   '/pending': typeof PendingRoute
-  '/ready': typeof ReadyRoute
   '/rejected': typeof RejectedRoute
   '/revoked': typeof RevokedRoute
-  '/session': typeof SessionRoute
   '/setup': typeof SetupRoute
-  '/signup': typeof SignupRoute
-  '/verify': typeof VerifyRoute
-  '/access': typeof AppAccessRoute
-  '/bookings': typeof AppBookingsRoute
-  '/confirmation': typeof AppConfirmationRoute
-  '/deposit': typeof AppDepositRoute
-  '/documents': typeof AppDocumentsRoute
   '/exceptions': typeof AppExceptionsRoute
   '/home': typeof AppHomeRoute
-  '/incident': typeof AppIncidentRoute
   '/jobs': typeof AppJobsRouteWithChildren
-  '/location': typeof AppLocationRoute
-  '/locations': typeof AppLocationsRoute
   '/log': typeof AppLogRoute
   '/notifications': typeof AppNotificationsRoute
-  '/organization': typeof AppOrganizationRoute
   '/password': typeof AppPasswordRoute
-  '/payment': typeof AppPaymentRoute
   '/profile': typeof AppProfileRoute
   '/profile-edit': typeof AppProfileEditRoute
-  '/properties': typeof AppPropertiesRoute
   '/qualifications': typeof AppQualificationsRoute
   '/report': typeof AppReportRoute
-  '/request': typeof AppRequestRoute
   '/roles': typeof AppRolesRoute
   '/sync': typeof AppSyncRoute
   '/tracking': typeof AppTrackingRoute
@@ -343,9 +219,7 @@ export interface FileRoutesByFullPath {
   '/field/$id': typeof AppFieldIdRoute
   '/jobs/$id': typeof AppJobsIdRoute
   '/pim/$id': typeof AppPimIdRoute
-  '/requests/$id': typeof AppRequestsIdRoute
   '/service/$id': typeof AppServiceIdRoute
-  '/services/$slug': typeof AppServicesSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -355,35 +229,19 @@ export interface FileRoutesByTo {
   '/more-info': typeof MoreInfoRoute
   '/onboarding': typeof OnboardingRoute
   '/pending': typeof PendingRoute
-  '/ready': typeof ReadyRoute
   '/rejected': typeof RejectedRoute
   '/revoked': typeof RevokedRoute
-  '/session': typeof SessionRoute
   '/setup': typeof SetupRoute
-  '/signup': typeof SignupRoute
-  '/verify': typeof VerifyRoute
-  '/access': typeof AppAccessRoute
-  '/bookings': typeof AppBookingsRoute
-  '/confirmation': typeof AppConfirmationRoute
-  '/deposit': typeof AppDepositRoute
-  '/documents': typeof AppDocumentsRoute
   '/exceptions': typeof AppExceptionsRoute
   '/home': typeof AppHomeRoute
-  '/incident': typeof AppIncidentRoute
   '/jobs': typeof AppJobsRouteWithChildren
-  '/location': typeof AppLocationRoute
-  '/locations': typeof AppLocationsRoute
   '/log': typeof AppLogRoute
   '/notifications': typeof AppNotificationsRoute
-  '/organization': typeof AppOrganizationRoute
   '/password': typeof AppPasswordRoute
-  '/payment': typeof AppPaymentRoute
   '/profile': typeof AppProfileRoute
   '/profile-edit': typeof AppProfileEditRoute
-  '/properties': typeof AppPropertiesRoute
   '/qualifications': typeof AppQualificationsRoute
   '/report': typeof AppReportRoute
-  '/request': typeof AppRequestRoute
   '/roles': typeof AppRolesRoute
   '/sync': typeof AppSyncRoute
   '/tracking': typeof AppTrackingRoute
@@ -392,9 +250,7 @@ export interface FileRoutesByTo {
   '/field/$id': typeof AppFieldIdRoute
   '/jobs/$id': typeof AppJobsIdRoute
   '/pim/$id': typeof AppPimIdRoute
-  '/requests/$id': typeof AppRequestsIdRoute
   '/service/$id': typeof AppServiceIdRoute
-  '/services/$slug': typeof AppServicesSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -406,35 +262,19 @@ export interface FileRoutesById {
   '/more-info': typeof MoreInfoRoute
   '/onboarding': typeof OnboardingRoute
   '/pending': typeof PendingRoute
-  '/ready': typeof ReadyRoute
   '/rejected': typeof RejectedRoute
   '/revoked': typeof RevokedRoute
-  '/session': typeof SessionRoute
   '/setup': typeof SetupRoute
-  '/signup': typeof SignupRoute
-  '/verify': typeof VerifyRoute
-  '/_app/access': typeof AppAccessRoute
-  '/_app/bookings': typeof AppBookingsRoute
-  '/_app/confirmation': typeof AppConfirmationRoute
-  '/_app/deposit': typeof AppDepositRoute
-  '/_app/documents': typeof AppDocumentsRoute
   '/_app/exceptions': typeof AppExceptionsRoute
   '/_app/home': typeof AppHomeRoute
-  '/_app/incident': typeof AppIncidentRoute
   '/_app/jobs': typeof AppJobsRouteWithChildren
-  '/_app/location': typeof AppLocationRoute
-  '/_app/locations': typeof AppLocationsRoute
   '/_app/log': typeof AppLogRoute
   '/_app/notifications': typeof AppNotificationsRoute
-  '/_app/organization': typeof AppOrganizationRoute
   '/_app/password': typeof AppPasswordRoute
-  '/_app/payment': typeof AppPaymentRoute
   '/_app/profile': typeof AppProfileRoute
   '/_app/profile-edit': typeof AppProfileEditRoute
-  '/_app/properties': typeof AppPropertiesRoute
   '/_app/qualifications': typeof AppQualificationsRoute
   '/_app/report': typeof AppReportRoute
-  '/_app/request': typeof AppRequestRoute
   '/_app/roles': typeof AppRolesRoute
   '/_app/sync': typeof AppSyncRoute
   '/_app/tracking': typeof AppTrackingRoute
@@ -443,9 +283,7 @@ export interface FileRoutesById {
   '/_app/field/$id': typeof AppFieldIdRoute
   '/_app/jobs/$id': typeof AppJobsIdRoute
   '/_app/pim/$id': typeof AppPimIdRoute
-  '/_app/requests/$id': typeof AppRequestsIdRoute
   '/_app/service/$id': typeof AppServiceIdRoute
-  '/_app/services/$slug': typeof AppServicesSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -457,35 +295,19 @@ export interface FileRouteTypes {
     | '/more-info'
     | '/onboarding'
     | '/pending'
-    | '/ready'
     | '/rejected'
     | '/revoked'
-    | '/session'
     | '/setup'
-    | '/signup'
-    | '/verify'
-    | '/access'
-    | '/bookings'
-    | '/confirmation'
-    | '/deposit'
-    | '/documents'
     | '/exceptions'
     | '/home'
-    | '/incident'
     | '/jobs'
-    | '/location'
-    | '/locations'
     | '/log'
     | '/notifications'
-    | '/organization'
     | '/password'
-    | '/payment'
     | '/profile'
     | '/profile-edit'
-    | '/properties'
     | '/qualifications'
     | '/report'
-    | '/request'
     | '/roles'
     | '/sync'
     | '/tracking'
@@ -494,9 +316,7 @@ export interface FileRouteTypes {
     | '/field/$id'
     | '/jobs/$id'
     | '/pim/$id'
-    | '/requests/$id'
     | '/service/$id'
-    | '/services/$slug'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -506,35 +326,19 @@ export interface FileRouteTypes {
     | '/more-info'
     | '/onboarding'
     | '/pending'
-    | '/ready'
     | '/rejected'
     | '/revoked'
-    | '/session'
     | '/setup'
-    | '/signup'
-    | '/verify'
-    | '/access'
-    | '/bookings'
-    | '/confirmation'
-    | '/deposit'
-    | '/documents'
     | '/exceptions'
     | '/home'
-    | '/incident'
     | '/jobs'
-    | '/location'
-    | '/locations'
     | '/log'
     | '/notifications'
-    | '/organization'
     | '/password'
-    | '/payment'
     | '/profile'
     | '/profile-edit'
-    | '/properties'
     | '/qualifications'
     | '/report'
-    | '/request'
     | '/roles'
     | '/sync'
     | '/tracking'
@@ -543,9 +347,7 @@ export interface FileRouteTypes {
     | '/field/$id'
     | '/jobs/$id'
     | '/pim/$id'
-    | '/requests/$id'
     | '/service/$id'
-    | '/services/$slug'
   id:
     | '__root__'
     | '/'
@@ -556,35 +358,19 @@ export interface FileRouteTypes {
     | '/more-info'
     | '/onboarding'
     | '/pending'
-    | '/ready'
     | '/rejected'
     | '/revoked'
-    | '/session'
     | '/setup'
-    | '/signup'
-    | '/verify'
-    | '/_app/access'
-    | '/_app/bookings'
-    | '/_app/confirmation'
-    | '/_app/deposit'
-    | '/_app/documents'
     | '/_app/exceptions'
     | '/_app/home'
-    | '/_app/incident'
     | '/_app/jobs'
-    | '/_app/location'
-    | '/_app/locations'
     | '/_app/log'
     | '/_app/notifications'
-    | '/_app/organization'
     | '/_app/password'
-    | '/_app/payment'
     | '/_app/profile'
     | '/_app/profile-edit'
-    | '/_app/properties'
     | '/_app/qualifications'
     | '/_app/report'
-    | '/_app/request'
     | '/_app/roles'
     | '/_app/sync'
     | '/_app/tracking'
@@ -593,9 +379,7 @@ export interface FileRouteTypes {
     | '/_app/field/$id'
     | '/_app/jobs/$id'
     | '/_app/pim/$id'
-    | '/_app/requests/$id'
     | '/_app/service/$id'
-    | '/_app/services/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -607,13 +391,9 @@ export interface RootRouteChildren {
   MoreInfoRoute: typeof MoreInfoRoute
   OnboardingRoute: typeof OnboardingRoute
   PendingRoute: typeof PendingRoute
-  ReadyRoute: typeof ReadyRoute
   RejectedRoute: typeof RejectedRoute
   RevokedRoute: typeof RevokedRoute
-  SessionRoute: typeof SessionRoute
   SetupRoute: typeof SetupRoute
-  SignupRoute: typeof SignupRoute
-  VerifyRoute: typeof VerifyRoute
   LegalDocRoute: typeof LegalDocRoute
 }
 
@@ -675,13 +455,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PendingRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/ready': {
-      id: '/ready'
-      path: '/ready'
-      fullPath: '/ready'
-      preLoaderRoute: typeof ReadyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/rejected': {
       id: '/rejected'
       path: '/rejected'
@@ -696,68 +469,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RevokedRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/session': {
-      id: '/session'
-      path: '/session'
-      fullPath: '/session'
-      preLoaderRoute: typeof SessionRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/setup': {
       id: '/setup'
       path: '/setup'
       fullPath: '/setup'
       preLoaderRoute: typeof SetupRouteImport
       parentRoute: typeof rootRouteImport
-    }
-    '/signup': {
-      id: '/signup'
-      path: '/signup'
-      fullPath: '/signup'
-      preLoaderRoute: typeof SignupRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/verify': {
-      id: '/verify'
-      path: '/verify'
-      fullPath: '/verify'
-      preLoaderRoute: typeof VerifyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_app/access': {
-      id: '/_app/access'
-      path: '/access'
-      fullPath: '/access'
-      preLoaderRoute: typeof AppAccessRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/bookings': {
-      id: '/_app/bookings'
-      path: '/bookings'
-      fullPath: '/bookings'
-      preLoaderRoute: typeof AppBookingsRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/confirmation': {
-      id: '/_app/confirmation'
-      path: '/confirmation'
-      fullPath: '/confirmation'
-      preLoaderRoute: typeof AppConfirmationRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/deposit': {
-      id: '/_app/deposit'
-      path: '/deposit'
-      fullPath: '/deposit'
-      preLoaderRoute: typeof AppDepositRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/documents': {
-      id: '/_app/documents'
-      path: '/documents'
-      fullPath: '/documents'
-      preLoaderRoute: typeof AppDocumentsRouteImport
-      parentRoute: typeof AppRoute
     }
     '/_app/exceptions': {
       id: '/_app/exceptions'
@@ -773,32 +490,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppHomeRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/incident': {
-      id: '/_app/incident'
-      path: '/incident'
-      fullPath: '/incident'
-      preLoaderRoute: typeof AppIncidentRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/_app/jobs': {
       id: '/_app/jobs'
       path: '/jobs'
       fullPath: '/jobs'
       preLoaderRoute: typeof AppJobsRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/location': {
-      id: '/_app/location'
-      path: '/location'
-      fullPath: '/location'
-      preLoaderRoute: typeof AppLocationRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/locations': {
-      id: '/_app/locations'
-      path: '/locations'
-      fullPath: '/locations'
-      preLoaderRoute: typeof AppLocationsRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/log': {
@@ -815,25 +511,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppNotificationsRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/organization': {
-      id: '/_app/organization'
-      path: '/organization'
-      fullPath: '/organization'
-      preLoaderRoute: typeof AppOrganizationRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/_app/password': {
       id: '/_app/password'
       path: '/password'
       fullPath: '/password'
       preLoaderRoute: typeof AppPasswordRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/payment': {
-      id: '/_app/payment'
-      path: '/payment'
-      fullPath: '/payment'
-      preLoaderRoute: typeof AppPaymentRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/profile': {
@@ -850,13 +532,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppProfileEditRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/properties': {
-      id: '/_app/properties'
-      path: '/properties'
-      fullPath: '/properties'
-      preLoaderRoute: typeof AppPropertiesRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/_app/qualifications': {
       id: '/_app/qualifications'
       path: '/qualifications'
@@ -869,13 +544,6 @@ declare module '@tanstack/react-router' {
       path: '/report'
       fullPath: '/report'
       preLoaderRoute: typeof AppReportRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/request': {
-      id: '/_app/request'
-      path: '/request'
-      fullPath: '/request'
-      preLoaderRoute: typeof AppRequestRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/roles': {
@@ -934,25 +602,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppPimIdRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/requests/$id': {
-      id: '/_app/requests/$id'
-      path: '/requests/$id'
-      fullPath: '/requests/$id'
-      preLoaderRoute: typeof AppRequestsIdRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/_app/service/$id': {
       id: '/_app/service/$id'
       path: '/service/$id'
       fullPath: '/service/$id'
       preLoaderRoute: typeof AppServiceIdRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/services/$slug': {
-      id: '/_app/services/$slug'
-      path: '/services/$slug'
-      fullPath: '/services/$slug'
-      preLoaderRoute: typeof AppServicesSlugRouteImport
       parentRoute: typeof AppRoute
     }
   }
@@ -970,71 +624,43 @@ const AppJobsRouteWithChildren =
   AppJobsRoute._addFileChildren(AppJobsRouteChildren)
 
 interface AppRouteChildren {
-  AppAccessRoute: typeof AppAccessRoute
-  AppBookingsRoute: typeof AppBookingsRoute
-  AppConfirmationRoute: typeof AppConfirmationRoute
-  AppDepositRoute: typeof AppDepositRoute
-  AppDocumentsRoute: typeof AppDocumentsRoute
   AppExceptionsRoute: typeof AppExceptionsRoute
   AppHomeRoute: typeof AppHomeRoute
-  AppIncidentRoute: typeof AppIncidentRoute
   AppJobsRoute: typeof AppJobsRouteWithChildren
-  AppLocationRoute: typeof AppLocationRoute
-  AppLocationsRoute: typeof AppLocationsRoute
   AppLogRoute: typeof AppLogRoute
   AppNotificationsRoute: typeof AppNotificationsRoute
-  AppOrganizationRoute: typeof AppOrganizationRoute
   AppPasswordRoute: typeof AppPasswordRoute
-  AppPaymentRoute: typeof AppPaymentRoute
   AppProfileRoute: typeof AppProfileRoute
   AppProfileEditRoute: typeof AppProfileEditRoute
-  AppPropertiesRoute: typeof AppPropertiesRoute
   AppQualificationsRoute: typeof AppQualificationsRoute
   AppReportRoute: typeof AppReportRoute
-  AppRequestRoute: typeof AppRequestRoute
   AppRolesRoute: typeof AppRolesRoute
   AppSyncRoute: typeof AppSyncRoute
   AppTrackingRoute: typeof AppTrackingRoute
   AppUploadRoute: typeof AppUploadRoute
   AppFieldIdRoute: typeof AppFieldIdRoute
   AppPimIdRoute: typeof AppPimIdRoute
-  AppRequestsIdRoute: typeof AppRequestsIdRoute
   AppServiceIdRoute: typeof AppServiceIdRoute
-  AppServicesSlugRoute: typeof AppServicesSlugRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
-  AppAccessRoute: AppAccessRoute,
-  AppBookingsRoute: AppBookingsRoute,
-  AppConfirmationRoute: AppConfirmationRoute,
-  AppDepositRoute: AppDepositRoute,
-  AppDocumentsRoute: AppDocumentsRoute,
   AppExceptionsRoute: AppExceptionsRoute,
   AppHomeRoute: AppHomeRoute,
-  AppIncidentRoute: AppIncidentRoute,
   AppJobsRoute: AppJobsRouteWithChildren,
-  AppLocationRoute: AppLocationRoute,
-  AppLocationsRoute: AppLocationsRoute,
   AppLogRoute: AppLogRoute,
   AppNotificationsRoute: AppNotificationsRoute,
-  AppOrganizationRoute: AppOrganizationRoute,
   AppPasswordRoute: AppPasswordRoute,
-  AppPaymentRoute: AppPaymentRoute,
   AppProfileRoute: AppProfileRoute,
   AppProfileEditRoute: AppProfileEditRoute,
-  AppPropertiesRoute: AppPropertiesRoute,
   AppQualificationsRoute: AppQualificationsRoute,
   AppReportRoute: AppReportRoute,
-  AppRequestRoute: AppRequestRoute,
   AppRolesRoute: AppRolesRoute,
   AppSyncRoute: AppSyncRoute,
   AppTrackingRoute: AppTrackingRoute,
   AppUploadRoute: AppUploadRoute,
   AppFieldIdRoute: AppFieldIdRoute,
   AppPimIdRoute: AppPimIdRoute,
-  AppRequestsIdRoute: AppRequestsIdRoute,
   AppServiceIdRoute: AppServiceIdRoute,
-  AppServicesSlugRoute: AppServicesSlugRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
@@ -1048,13 +674,9 @@ const rootRouteChildren: RootRouteChildren = {
   MoreInfoRoute: MoreInfoRoute,
   OnboardingRoute: OnboardingRoute,
   PendingRoute: PendingRoute,
-  ReadyRoute: ReadyRoute,
   RejectedRoute: RejectedRoute,
   RevokedRoute: RevokedRoute,
-  SessionRoute: SessionRoute,
   SetupRoute: SetupRoute,
-  SignupRoute: SignupRoute,
-  VerifyRoute: VerifyRoute,
   LegalDocRoute: LegalDocRoute,
 }
 export const routeTree = rootRouteImport
